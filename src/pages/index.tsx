@@ -51,37 +51,35 @@ const PostView = (props: PostWithUser) => {
           <span className="font-bold">{`@${author.username}`}</span>
           <span>{` · ${dayjs(post.createdAt).fromNow()} `}</span>
         </div>
-        <span className="">{post.content}</span>
+        <span className="text-2xl">{post.content}</span>
       </div>
     </div>
   );
 };
 
 const Feed = () => {
-  const { isLoaded: postsLoading } = useUser();
+  const { data, isLoading: postsLoading } = api.posts.getAll.useQuery();
 
-  const { data, isLoading: postsLoaded } = api.posts.getAll.useQuery();
+  if (postsLoading) return <LoadingPage />;
 
-  
+  if (!data) return <div />;
 
-  if (!postsLoading ) return <LoadingPage/>;
-
-  if(!data) return <div/>;
-
-  if(!data) return <div/>;
+  if (!data) return <div />;
   return (
     <div className="flex flex-col">
-    {[...data, ...data].map((fullPost) => (
-      <PostView {...fullPost} key={fullPost.post.id} />
-    ))}
-  </div>
-  )
-}
+      {[...data, ...data].map((fullPost) => (
+        <PostView {...fullPost} key={fullPost.post.id} />
+      ))}
+    </div>
+  );
+};
 
 export default function Home() {
-  const { isLoaded: postsLoading, isSignedIn } = useUser();
+  const { isLoaded: userLoaded, isSignedIn } = useUser();
 
   api.posts.getAll.useQuery();
+
+  if(!userLoaded) return <LoadingPage/>
   return (
     <>
       <Head>
@@ -99,7 +97,7 @@ export default function Home() {
             )}
             {isSignedIn && <CreatePostWizard />}
           </div>
-          <Feed/>
+          <Feed />
         </div>
       </main>
     </>
