@@ -20,7 +20,7 @@ const CreatePostWizard = () => {
     onSuccess: () => {
       setInput("");
       void ctx.posts.getAll.invalidate();
-    }
+    },
   });
 
   if (!user) return null;
@@ -42,7 +42,7 @@ const CreatePostWizard = () => {
         onChange={(e) => setInput(e.target.value)}
         disabled={isPosting}
       />
-      <button onClick={()=> mutate({content: input})}>POST</button>
+      <button onClick={() => mutate({ content: input })}>POST</button>
     </div>
   );
 };
