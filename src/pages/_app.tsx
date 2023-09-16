@@ -12,13 +12,13 @@ const MyApp: AppType = ({ Component, pageProps }) => {
     <ClerkProvider {...pageProps}>
       <Head>
         <title>Chirp</title>
-        <meta name="description" content="Chirp" />
+        <meta name="description" content="💭" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Toaster position="bottom-center"/>
+      <Toaster position="bottom-center" />
       <Component {...pageProps} />
     </ClerkProvider>
-  )
+  );
 };
 
 export default api.withTRPC(MyApp);

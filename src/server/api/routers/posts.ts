@@ -32,6 +32,16 @@ const addUserDataToPosts = async (posts: Post[]) => {
         message: `Author for post not found. POST ID: ${post.id}, USER ID: ${post.authorId}`,
       });
     }
+    if (!author.username) {
+      // user the ExternalUsername
+      if (!author.externalUsername) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: `Author has no GitHub Account: ${author.id}`,
+        });
+      }
+      author.username = author.externalUsername;
+    }
     return {
       post,
       author: {
@@ -53,13 +63,16 @@ export const postsRouter = createTRPCRouter({
   getById: publicProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
+      const replaceId = input.id.replace("@", "")
       const post = await ctx.db.post.findUnique({
-        where: { id: input.id },
+        where: { id: replaceId },
       });
+
+      console.log(post)
 
       if (!post) throw new TRPCError({ code: "NOT_FOUND" });
 
-      return (await addUserDataToPosts([post]))[0];
+      return post
     }),
 
   getAll: publicProcedure.query(async ({ ctx }) => {
@@ -75,7 +88,7 @@ export const postsRouter = createTRPCRouter({
     .input(
       z.object({
         userId: z.string(),
-      }),
+      })
     )
     .query(({ ctx, input }) =>
       ctx.db.post
@@ -86,14 +99,14 @@ export const postsRouter = createTRPCRouter({
           take: 100,
           orderBy: [{ createdAt: "desc" }],
         })
-        .then(addUserDataToPosts),
+        .then(addUserDataToPosts)
     ),
 
   create: privateProcedure
     .input(
       z.object({
         content: z.string().emoji("Only emojis are allowed").min(1).max(280),
-      }),
+      })
     )
     .mutation(async ({ ctx, input }) => {
       const authorId = ctx.userId;
